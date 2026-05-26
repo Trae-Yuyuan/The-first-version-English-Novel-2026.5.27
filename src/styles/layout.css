@@ -1,0 +1,153 @@
+body {
+  margin: 0;
+  background: black;
+  color: white;
+  font-family: 'Press Start 2P', monospace;
+}
+
+.app-container {
+  min-height: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.window-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.panel {
+  border: 4px solid white;
+
+  min-height: 700px;
+
+  padding: 16px;
+
+  position: relative;
+
+  background: black;
+
+  box-shadow:
+    0 0 10px rgba(255,255,255,0.15),
+    inset 0 0 20px rgba(255,255,255,0.04);
+}
+.panel-title {
+   border-bottom: 3px dashed white;
+
+  padding-bottom: 12px;
+
+  margin-bottom: 20px;
+
+  font-size: 14px;
+
+  text-align: center;
+
+  letter-spacing: 2px;
+
+  text-shadow: 0 0 4px white;
+}
+
+.panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.drop-zone {
+  border: 3px dashed white;
+  min-height: 220px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 20px;
+
+  image-rendering: pixelated;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.pixel-btn {
+  background: black;
+  color: white;
+
+  border: 3px solid white;
+
+  padding: 14px 18px;
+
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition: all 0.12s ease;
+
+  box-shadow: 4px 4px 0 white;
+  text-shadow: 0 0 3px white;
+}
+
+.pixel-btn:hover {
+  background: white;
+  color: black;
+
+  transform: translate(2px, 2px);
+
+  box-shadow:
+  2px 2px 0 white,
+  0 0 12px rgba(255,255,255,0.5);
+}
+
+.pixel-btn:active {
+  transform: translate(4px, 4px);
+
+  box-shadow: none;
+}
+.fake-doc {
+  border: 2px dashed white;
+
+  padding: 16px;
+
+  min-height: 220px;
+
+  max-height: 420px;
+
+  overflow-y: auto;
+
+  line-height: 2;
+
+  font-size: 10px;
+
+  box-shadow:
+    inset 0 0 10px rgba(255,255,255,0.05);
+}
+.drop-zone:hover {
+  background: white;
+
+  color: black;
+
+  box-shadow: 0 0 12px rgba(255,255,255,0.5);
+}
+.fake-doc div {
+  animation: terminalFade 0.2s ease;
+}
+
+@keyframes terminalFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.pixel-cat {
+  image-rendering: pixelated;
+  display: block;
+  margin: 0 auto;
+}
