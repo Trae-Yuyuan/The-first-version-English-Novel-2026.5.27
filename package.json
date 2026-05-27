@@ -12,29 +12,25 @@
     "preview": "vite preview",
     "electron": "electron electron/main.js",
     "dev:desktop": "concurrently \"pnpm dev\" \"wait-on http://localhost:5173 && electron electron/main.js\"",
-    "build:desktop": "electron-builder --publish never"
+    "build:desktop": "electron-builder"
   },
 
   "build": {
-  "appId": "com.emotionai.app",
-  "productName": "EmotionAI",
-
-  "directories": {
-    "output": "dist"
+    "appId": "com.emotionai.app",
+    "productName": "EmotionAI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "publish": null
   },
-
-  "files": [
-    "dist/**/*",
-    "electron/**/*",
-    "package.json"
-  ],
-
-  "win": {
-    "target": "nsis"
-  },
-
-  "publish": null
-}
 
   "dependencies": {
     "@fontsource/press-start-2p": "^5.2.7",
