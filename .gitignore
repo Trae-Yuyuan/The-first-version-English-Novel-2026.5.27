@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Electron build output
+electron/dist
+out
+release
+*.exe
+*.blockmap
+
+# Python backend cache
+__pycache__/
+*.pyc
+
+# Flask temp files
+temp_*
+outputs/
