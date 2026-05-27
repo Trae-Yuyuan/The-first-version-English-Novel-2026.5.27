@@ -16,25 +16,25 @@
   },
 
   "build": {
-    "appId": "com.emotionai.app",
-    "productName": "EmotionAI",
+  "appId": "com.emotionai.app",
+  "productName": "EmotionAI",
 
-    "directories": {
-      "output": "dist"
-    },
-
-    "files": [
-      "dist/**/*",
-      "electron/**/*",
-      "package.json"
-    ],
-
-    "win": {
-      "target": "nsis"
-    },
-
-    "publish": "never"
+  "directories": {
+    "output": "dist"
   },
+
+  "files": [
+    "dist/**/*",
+    "electron/**/*",
+    "package.json"
+  ],
+
+  "win": {
+    "target": "nsis"
+  },
+
+  "publish": null
+}
 
   "dependencies": {
     "@fontsource/press-start-2p": "^5.2.7",
