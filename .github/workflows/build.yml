@@ -12,15 +12,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ✅ 关键：强制 Node 20（不要用18）
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          # ❌ 删除 npm cache（关键修复）
+          # cache: 'npm'
 
-      # ❌ 不用 corepack（避免 pnpm 11 bug）
-      - name: Install pnpm 9
+      - name: Install pnpm
         run: npm install -g pnpm@9
 
       - name: Verify pnpm
