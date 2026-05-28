@@ -12,20 +12,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ✅ 固定 Node 20（不要 22，不要 18）
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Enable corepack
-        run: corepack enable
-
-      - name: Install pnpm
+      # ❌ 禁用 corepack（关键！防止 pnpm 11）
+      - name: Install pnpm 9
         run: npm install -g pnpm@9
 
-      # ❗关键：告诉 pnpm 当前是项目
-      - name: Show workspace
-        run: dir
+      - name: Verify versions
+        run: |
+          node -v
+          pnpm -v
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
