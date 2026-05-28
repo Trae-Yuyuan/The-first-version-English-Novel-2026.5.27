@@ -1,8 +1,9 @@
-name: Build Electron App
+name: Build and Release Electron App
 
 on:
   push:
-    branches: [main]
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -23,11 +24,13 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Build desktop app
+      - name: Build Electron App
         run: npm run build:desktop
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: EmotionAI-Windows
-          path: dist
+          files: |
+            dist/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
