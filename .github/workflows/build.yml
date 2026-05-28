@@ -16,14 +16,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          # ❌ 删除 npm cache（关键修复）
-          # cache: 'npm'
+
+      - name: Enable corepack
+        run: corepack enable
 
       - name: Install pnpm
         run: npm install -g pnpm@9
 
-      - name: Verify pnpm
-        run: pnpm -v
+      # ❗关键：告诉 pnpm 当前是项目
+      - name: Show workspace
+        run: dir
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
