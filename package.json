@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "main": "electron/main.js",
+  "description": "Emotion AI Desktop App",
+  "author": "emotion-ai",
 
   "scripts": {
     "dev": "vite",
@@ -28,13 +30,13 @@
     ],
 
     "win": {
-      "target": "nsis",
-      "sign": false
+      "target": "nsis"
     },
 
     "nsis": {
       "oneClick": true,
-      "perMachine": false
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false
     },
 
     "publish": null
