@@ -8,39 +8,53 @@ jobs:
   build:
     runs-on: windows-latest
 
-    defaults:
-      run:
-        working-directory: .
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # =========================
+      # 1. Node（稳定版本）
+      # =========================
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install pnpm
-        run: npm i -g pnpm@9
+      # =========================
+      # 2. 强制使用 npm 安装 pnpm（最稳定）
+      # =========================
+      - name: Install pnpm safely
+        run: npm install -g pnpm@9 --no-audit --no-fund
 
-      # ✅ 强制确认目录（关键修复点）
-      - name: Show files
-        run: dir
+      # ⚠️ 不要 pnpm -v（会触发你那个 packages bug）
 
-      - name: Verify pnpm works
-        run: pnpm -v
+      - name: Show environment
+        run: |
+          node -v
+          npm -v
 
+      # =========================
+      # 3. 强制 clean install
+      # =========================
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile --ignore-scripts
 
+      # =========================
+      # 4. Build Frontend
+      # =========================
       - name: Build Vite
         run: pnpm run build
 
+      # =========================
+      # 5. Build Electron
+      # =========================
       - name: Build Electron
         run: pnpm run build:desktop
 
-      - name: Upload artifact
+      # =========================
+      # 6. Upload artifact
+      # =========================
+      - name: Upload build
         uses: actions/upload-artifact@v4
         with:
           name: EmotionAI-Windows
