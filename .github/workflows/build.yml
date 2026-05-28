@@ -12,20 +12,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ✅ 固定 Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # ✅ 用 corepack（不会卡）
-      - name: Enable Corepack
-        run: corepack enable
+      # ❌ 完全禁止 corepack（关键）
+      # ❌ 不用 pnpm global install（避免卡死）
 
-      # ✅ 强制 pnpm 9（关键）
-      - name: Prepare pnpm
-        run: corepack prepare pnpm@9.0.0 --activate
+      - name: Install pnpm directly
+        run: npm i -g pnpm@9 --no-audit --no-fund
 
-      - name: Verify versions
+      - name: Verify environment
         run: |
           node -v
           pnpm -v
