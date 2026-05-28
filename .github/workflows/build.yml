@@ -9,16 +9,34 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      # ✅ 关键：强制 Node 20（不要用18）
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
+          cache: 'npm'
 
-      - run: corepack enable
+      # ❌ 不用 corepack（避免 pnpm 11 bug）
+      - name: Install pnpm 9
+        run: npm install -g pnpm@9
 
-      - run: pnpm install --no-frozen-lockfile
+      - name: Verify pnpm
+        run: pnpm -v
 
-      - run: pnpm run build:web
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
 
-      - run: npx electron-builder --publish never
+      - name: Build Vite
+        run: pnpm run build
+
+      - name: Build Electron
+        run: pnpm run build:desktop
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EmotionAI-Windows
+          path: dist
