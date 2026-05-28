@@ -12,15 +12,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ✅ 固定 Node 20（不要 22，不要 18）
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # ❌ 禁用 corepack（关键！防止 pnpm 11）
-      - name: Install pnpm 9
-        run: npm install -g pnpm@9
+      # ✅ 用 corepack（不会卡）
+      - name: Enable Corepack
+        run: corepack enable
+
+      # ✅ 强制 pnpm 9（关键）
+      - name: Prepare pnpm
+        run: corepack prepare pnpm@9.0.0 --activate
 
       - name: Verify versions
         run: |
