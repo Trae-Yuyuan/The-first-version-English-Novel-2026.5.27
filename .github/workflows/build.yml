@@ -12,35 +12,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # =====================
-      # 1. Node
-      # =====================
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # =====================
-      # 2. 用 npm 安装依赖（绕开 pnpm bug）
-      # =====================
-      - name: Install dependencies (npm fallback)
+      - name: Install dependencies
         run: npm install
 
-      # =====================
-      # 3. 构建 Vite
-      # =====================
       - name: Build frontend
         run: npm run build
 
-      # =====================
-      # 4. 构建 Electron
-      # =====================
       - name: Build Electron
         run: npm run build:desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
-      # =====================
-      # 5. 上传 exe
-      # =====================
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

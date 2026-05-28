@@ -16,23 +16,28 @@
   "build": {
     "appId": "com.emotionai.app",
     "productName": "EmotionAI",
+
     "directories": {
       "output": "dist"
     },
+
     "files": [
       "dist/**/*",
       "electron/**/*",
       "package.json"
     ],
-    "extraResources": [
-      {
-        "from": "electron/backend",
-        "to": "backend"
-      }
-    ],
+
     "win": {
-      "target": "nsis"
-    }
+      "target": "nsis",
+      "sign": false
+    },
+
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
+    },
+
+    "publish": null
   },
 
   "dependencies": {
