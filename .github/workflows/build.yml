@@ -8,26 +8,28 @@ jobs:
   build:
     runs-on: windows-latest
 
+    defaults:
+      run:
+        working-directory: .
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ✅ 固定 Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # ❌ 完全禁止 corepack（关键）
-      # ❌ 不用 pnpm global install（避免卡死）
+      - name: Install pnpm
+        run: npm i -g pnpm@9
 
-      - name: Install pnpm directly
-        run: npm i -g pnpm@9 --no-audit --no-fund
+      # ✅ 强制确认目录（关键修复点）
+      - name: Show files
+        run: dir
 
-      - name: Verify environment
-        run: |
-          node -v
-          pnpm -v
+      - name: Verify pnpm works
+        run: pnpm -v
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
