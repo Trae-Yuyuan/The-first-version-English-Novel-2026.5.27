@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -52,12 +55,13 @@ jobs:
       - name: Package release zip
         shell: pwsh
         run: |
-          Compress-Archive -Path backend\dist\AI-Novel-Translator\* -DestinationPath AI-Novel-Translator-Windows.zip
+          Compress-Archive -Path backend\dist\AI-Novel-Translator\* -DestinationPath ${{ github.workspace }}\AI-Novel-Translator-Windows.zip
+          Write-Host "Zip created at: ${{ github.workspace }}\AI-Novel-Translator-Windows.zip"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: AI-Novel-Translator-Windows.zip
+          files: ${{ github.workspace }}\AI-Novel-Translator-Windows.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
