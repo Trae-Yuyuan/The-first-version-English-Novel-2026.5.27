@@ -1,15 +1,36 @@
-"""Flask API server for AI novel translation."""
+"""Flask API server for AI novel translation.
 
+Supports both:
+- Dev mode: Vite dev server proxies /api to Flask (port 5000)
+- Production/EXE mode: Flask serves built frontend + API on same port
+"""
+
+import os
+import sys
 import traceback
-from flask import Flask, request, jsonify
+import mimetypes
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from translator import translate
-from config import FLASK_PORT, MAX_CONTENT_LENGTH
+from config import FLASK_PORT, FLASK_HOST, MAX_CONTENT_LENGTH
+
+# ── Path handling for PyInstaller ──────────────────────────────────────────
+# When packaged with PyInstaller, sys._MEIPASS points to the temp
+# extraction directory where bundled data files live.
+if getattr(sys, "frozen", False):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+HAS_STATIC = os.path.isdir(STATIC_DIR)
 
 app = Flask(__name__)
 CORS(app)
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 
+
+# ── API Routes ─────────────────────────────────────────────────────────────
 
 @app.route("/api/translate", methods=["POST"])
 def handle_translate():
@@ -56,5 +77,57 @@ def health():
     return jsonify({"status": "ok"})
 
 
+# ── Frontend Static Serving (production / EXE mode) ────────────────────────
+
+@app.route("/")
+def serve_index():
+    """Serve the frontend entry point."""
+    if HAS_STATIC:
+        return send_from_directory(STATIC_DIR, "index.html")
+    return jsonify({"error": "Frontend not built. Run: cd frontend && npm run build"}), 404
+
+
+@app.route("/<path:path>")
+def serve_frontend(path):
+    """
+    Serve frontend assets with SPA fallback.
+    - API routes are matched first (registered above).
+    - If the path matches a real file in STATIC_DIR, serve it.
+    - Otherwise return index.html (SPA client-side routing).
+    """
+    if HAS_STATIC:
+        file_path = os.path.join(STATIC_DIR, path)
+        if os.path.isfile(file_path):
+            mimetype, _ = mimetypes.guess_type(file_path)
+            return send_from_directory(
+                STATIC_DIR, path, mimetype=mimetype
+            )
+        # SPA fallback — let React handle the route
+        return send_from_directory(STATIC_DIR, "index.html")
+    return jsonify({"error": "Not found"}), 404
+
+
+# ── Startup ────────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
-    app.run(debug=True, port=FLASK_PORT)
+    import webbrowser
+    import threading
+
+    def open_browser():
+        """Auto-open the app in the default browser after a short delay."""
+        url = f"http://{FLASK_HOST}:{FLASK_PORT}"
+        print(f"  Opening {url} ...")
+        webbrowser.open(url)
+
+    print("=" * 56)
+    print("  AI Novel Translator Server")
+    print(f"  URL:  http://{FLASK_HOST}:{FLASK_PORT}")
+    print("  Press Ctrl+C to stop the server")
+    print("=" * 56)
+
+    # Only auto-open when the frontend is bundled (production/EXE mode).
+    # In dev mode, Vite opens its own browser tab on port 5173.
+    if HAS_STATIC:
+        threading.Timer(1.0, open_browser).start()
+
+    app.run(debug=False, host=FLASK_HOST, port=FLASK_PORT)

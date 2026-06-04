@@ -9,6 +9,9 @@ __pycache__/
 frontend/node_modules/
 frontend/dist/
 
+# Built frontend (CI generates this)
+backend/static/
+
 # IDE
 .vscode/
 .idea/

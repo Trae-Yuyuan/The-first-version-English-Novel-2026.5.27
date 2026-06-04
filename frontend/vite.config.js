@@ -3,6 +3,9 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  // Base path for production build — must be '/' so asset URLs are absolute
+  // and work correctly when Flask serves the built frontend.
+  base: "/",
   server: {
     port: 5173,
     proxy: {
@@ -11,5 +14,9 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+  },
+  build: {
+    outDir: "dist",
+    assetsDir: "assets",
   },
 });

@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -28,25 +28,36 @@ jobs:
           cd frontend
           npm run build
 
+      - name: Copy frontend to backend static
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path backend\static
+          Copy-Item -Recurse -Force frontend\dist\* backend\static\
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Package release
+      - name: Install Python dependencies
         run: |
-          mkdir -p release/backend
-          cp -r backend/*.py backend/requirements.txt release/backend/
-          cp -r frontend/dist release/frontend
-          cp -r scripts release/
-          cp README.md release/
-          cd release
-          zip -r ../ai-novel-translator.zip .
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Build EXE with PyInstaller
+        run: |
+          cd backend
+          pyinstaller --onedir --add-data "static;static" --name "AI-Novel-Translator" --noconsole app.py
+
+      - name: Package release zip
+        shell: pwsh
+        run: |
+          Compress-Archive -Path backend\dist\AI-Novel-Translator\* -DestinationPath AI-Novel-Translator-Windows.zip
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ai-novel-translator.zip
+          files: AI-Novel-Translator-Windows.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
