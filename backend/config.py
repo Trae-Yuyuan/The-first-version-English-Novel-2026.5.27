@@ -9,6 +9,9 @@ DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
 # Chunking
 MAX_CHUNK_SIZE = 2000  # characters per translation chunk
 
+# COZE API
+COZE_API_BASE = os.getenv("COZE_API_BASE", "https://api.coze.cn")
+
 # Flask
 FLASK_HOST = os.getenv("FLASK_HOST", "127.0.0.1")
 FLASK_PORT = int(os.getenv("FLASK_PORT", 5000))

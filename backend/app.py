@@ -12,6 +12,7 @@ import mimetypes
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from translator import translate
+from debater_routes import handle_chat, list_sessions, get_session, delete_session
 from config import FLASK_PORT, FLASK_HOST, MAX_CONTENT_LENGTH
 
 # ── Path handling for PyInstaller ──────────────────────────────────────────
@@ -75,6 +76,32 @@ def handle_translate():
 def health():
     """Health check endpoint."""
     return jsonify({"status": "ok"})
+
+
+# ── Debater / COZE Chat Routes ─────────────────────────────────────────────
+
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    """Proxy a chat message to COZE bot and return the response."""
+    return handle_chat()
+
+
+@app.route("/api/sessions", methods=["GET"])
+def api_list_sessions():
+    """Return all debater sessions (metadata only)."""
+    return list_sessions()
+
+
+@app.route("/api/sessions/<session_id>", methods=["GET"])
+def api_get_session(session_id):
+    """Return a single debater session with full message history."""
+    return get_session(session_id)
+
+
+@app.route("/api/sessions/<session_id>", methods=["DELETE"])
+def api_delete_session(session_id):
+    """Delete a debater session."""
+    return delete_session(session_id)
 
 
 # ── Frontend Static Serving (production / EXE mode) ────────────────────────
