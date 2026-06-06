@@ -1,0 +1,111 @@
+"""Debater / COZE chat routes.
+
+POST /api/chat     — send a message to COZE bot, get AI reply
+GET  /api/sessions — list all sessions (metadata only)
+GET  /api/sessions/<id> — get full session with messages
+DELETE /api/sessions/<id> — delete a session
+"""
+
+from flask import request, jsonify
+from coze_client import chat_with_bot
+from session_manager import session_manager
+
+
+def register_chat_routes(app):
+    """Register chat + session routes on the Flask app."""
+
+    @app.route("/api/chat", methods=["POST"])
+    def api_chat():
+        """Send a message to COZE and return the AI response.
+
+        Body: {
+            api_key: str, bot_id: str, session_id: str,
+            message: str, mode: "debate"|"discuss",
+            api_url: str (optional)
+        }
+        Returns: { session_id, text, audio_url }
+        """
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({"error": "Request body must be JSON"}), 400
+
+        api_key = data.get("api_key", "").strip()
+        bot_id = data.get("bot_id", "").strip()
+        session_id = data.get("session_id", "").strip()
+        message = data.get("message", "").strip()
+        mode = data.get("mode", "debate")
+        api_url = data.get("api_url", "").strip() or None
+
+        # Validation
+        if not api_key:
+            return jsonify({"error": "COZE API Key is required"}), 400
+        if not bot_id:
+            return jsonify({"error": "Bot ID is required"}), 400
+        if not message:
+            return jsonify({"error": "Message is required"}), 400
+        if mode not in ("debate", "discuss"):
+            return jsonify({"error": "Mode must be 'debate' or 'discuss'"}), 400
+
+        # Ensure session exists
+        sid = session_manager.get_or_create(session_id, mode=mode, bot_id=bot_id)
+
+        # Check message cap
+        if session_manager.is_full(sid):
+            return jsonify({"error": "Session message limit reached (100)"}), 400
+
+        # Call COZE
+        conversation_id = session_manager.get_conversation_id(sid)
+        try:
+            result = chat_with_bot(
+                api_key=api_key,
+                bot_id=bot_id,
+                user_message=message,
+                conversation_id=conversation_id,
+                api_url=api_url,
+            )
+        except RuntimeError as e:
+            msg = str(e)
+            if "Invalid" in msg or "401" in msg or "403" in msg:
+                return jsonify({"error": msg}), 401
+            return jsonify({"error": msg}), 502
+
+        # Store messages in session
+        session_manager.add_messages(sid, [
+            {"role": "user", "content": message, "audio_url": None},
+            {
+                "role": "assistant",
+                "content": result["text"],
+                "audio_url": result.get("audio_url"),
+            },
+        ])
+
+        # Update COZE conversation_id for multi-turn
+        conv_id = result.get("conversation_id")
+        if conv_id:
+            session_manager.set_conversation_id(sid, conv_id)
+
+        return jsonify({
+            "session_id": sid,
+            "text": result["text"],
+            "audio_url": result.get("audio_url"),
+        })
+
+    @app.route("/api/sessions", methods=["GET"])
+    def api_list_sessions():
+        """Return all sessions (metadata only)."""
+        return jsonify({"sessions": session_manager.list_all()})
+
+    @app.route("/api/sessions/<session_id>", methods=["GET"])
+    def api_get_session(session_id):
+        """Return a single session with full message history."""
+        s = session_manager.get_full(session_id)
+        if not s:
+            return jsonify({"error": "Session not found"}), 404
+        return jsonify(s)
+
+    @app.route("/api/sessions/<session_id>", methods=["DELETE"])
+    def api_delete_session(session_id):
+        """Delete a session."""
+        if session_manager.delete(session_id):
+            return jsonify({"status": "deleted"})
+        return jsonify({"error": "Session not found"}), 404
