@@ -66,3 +66,36 @@ export async function deleteSessionApi(id) {
   );
   return response.json();
 }
+
+// ── Backend Config (config.json on disk) ──────────────────────
+
+export async function getBackendConfig() {
+  const response = await fetch(`${API_BASE}/config`);
+  if (!response.ok) {
+    throw new Error(`Config fetch failed: HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function saveBackendConfig(updates) {
+  const response = await fetch(`${API_BASE}/config`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updates),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || `Config save failed: HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+// ── Graceful shutdown (EXE mode) ──────────────────────────────
+
+export async function requestShutdown() {
+  try {
+    await fetch(`${API_BASE}/shutdown`, { method: "POST" });
+  } catch {
+    // Server already shutting down — ignore
+  }
+}

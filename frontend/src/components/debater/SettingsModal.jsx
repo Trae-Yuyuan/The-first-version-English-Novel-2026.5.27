@@ -11,6 +11,7 @@
  */
 import { useState, useEffect } from "react";
 import useDebaterStore from "../../store/debaterStore";
+import { saveBackendConfig } from "../../api";
 
 export default function SettingsModal({ open, onClose }) {
   const { settings, setSettings } = useDebaterStore();
@@ -36,18 +37,30 @@ export default function SettingsModal({ open, onClose }) {
 
   const handleSave = () => {
     setSaveError(null);
+    const newSettings = {
+      apiKey: apiKey.trim(),
+      debateBotId: debateBotId.trim(),
+      discussBotId: discussBotId.trim(),
+      cozeApiUrl: cozeApiUrl.trim(),
+    };
     try {
-      setSettings({
-        apiKey: apiKey.trim(),
-        debateBotId: debateBotId.trim(),
-        discussBotId: discussBotId.trim(),
-        cozeApiUrl: cozeApiUrl.trim(),
-      });
+      setSettings(newSettings);
     } catch (err) {
       console.error("Failed to save settings:", err);
       setSaveError(`Save failed: ${err.message || err}`);
-      return; // don't close — let the user see the error
+      return;
     }
+    // Also persist to backend config.json on disk (EXE survival)
+    saveBackendConfig({
+      api_key: newSettings.apiKey,
+      bot_id_debate: newSettings.debateBotId,
+      bot_id_discuss: newSettings.discussBotId,
+      coze_api_url: newSettings.cozeApiUrl,
+    }).catch((err) => {
+      // Backend may be unreachable in dev mode — that's OK, Zustand local
+      // storage already has the value.
+      console.warn("Backend config save skipped:", err.message);
+    });
     onClose();
   };
 

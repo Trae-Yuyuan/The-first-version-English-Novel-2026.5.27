@@ -12,6 +12,14 @@ frontend/dist/
 # Built frontend (CI generates this)
 backend/static/
 
+# PyInstaller output
+backend/build/
+backend/dist/
+*.spec
+
+# Runtime config (generated on first launch)
+backend/config.json
+
 # IDE
 .vscode/
 .idea/
